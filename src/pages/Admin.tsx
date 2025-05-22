@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useRestaurants } from '../context/RestaurantContext';
 import { useNavigate } from 'react-router-dom';
@@ -22,16 +23,24 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Utensils } from 'lucide-react';
+import { Plus, Utensils, Search, Trash } from 'lucide-react';
 
 const Admin = () => {
-  const { restaurants, addRestaurant } = useRestaurants();
+  const { restaurants, addRestaurant, removeRestaurant } = useRestaurants();
   const navigate = useNavigate();
   const [restaurantName, setRestaurantName] = useState('');
   const [restaurantDescription, setRestaurantDescription] = useState('');
   const [restaurantLogo, setRestaurantLogo] = useState('');
   const [restaurantCover, setRestaurantCover] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDelisting, setIsDelisting] = useState(false);
+  const [restaurantToDelete, setRestaurantToDelete] = useState<string | null>(null);
+
+  // Filter restaurants based on search query
+  const filteredRestaurants = restaurants.filter(restaurant => 
+    restaurant.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleAddRestaurant = () => {
     if (!restaurantName.trim()) {
@@ -56,6 +65,20 @@ const Admin = () => {
     
     // Navigate to the restaurant menu management page
     navigate(`/admin/restaurant/${newRestaurantId}`);
+  };
+
+  const handleDelistRestaurant = (id: string) => {
+    setRestaurantToDelete(id);
+    setIsDelisting(true);
+  };
+
+  const confirmDelist = () => {
+    if (restaurantToDelete) {
+      removeRestaurant(restaurantToDelete);
+      toast.success("Restaurant has been delisted successfully");
+      setIsDelisting(false);
+      setRestaurantToDelete(null);
+    }
   };
 
   return (
@@ -134,9 +157,22 @@ const Admin = () => {
         </Dialog>
       </div>
 
+      {/* Search bar for restaurants */}
+      <div className="mb-6 relative">
+        <div className="flex items-center w-full max-w-md border rounded-md overflow-hidden">
+          <Search className="h-4 w-4 mx-3 text-gray-500" />
+          <Input
+            placeholder="Search restaurants by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {restaurants.length > 0 ? (
-          restaurants.map(restaurant => (
+        {filteredRestaurants.length > 0 ? (
+          filteredRestaurants.map(restaurant => (
             <Card key={restaurant.id} className="overflow-hidden">
               <div className="h-48 w-full overflow-hidden">
                 <img 
@@ -174,19 +210,30 @@ const Admin = () => {
                 >
                   View Menu
                 </Button>
-                <Button
-                  onClick={() => navigate(`/admin/restaurant/${restaurant.id}`)}
-                >
-                  Manage Menu
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => navigate(`/admin/restaurant/${restaurant.id}`)}
+                  >
+                    Manage Menu
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => handleDelistRestaurant(restaurant.id)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           ))
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center p-12 border border-dashed rounded-lg">
             <Utensils className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-1">No restaurants yet</h3>
-            <p className="text-gray-500 mb-4">Start by adding your first restaurant</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">No restaurants found</h3>
+            <p className="text-gray-500 mb-4">
+              {searchQuery ? "Try a different search term" : "Start by adding your first restaurant"}
+            </p>
             <Button onClick={() => setIsDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Restaurant
@@ -194,6 +241,22 @@ const Admin = () => {
           </div>
         )}
       </div>
+
+      {/* Confirmation dialog for delisting a restaurant */}
+      <Dialog open={isDelisting} onOpenChange={setIsDelisting}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delist Restaurant</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delist this restaurant? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setIsDelisting(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelist}>Delist Restaurant</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

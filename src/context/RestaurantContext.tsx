@@ -9,6 +9,7 @@ interface RestaurantContextType {
   addDish: (restaurantId: string, dish: Omit<Dish, 'id' | 'restaurantId'>) => void;
   updateDish: (dish: Dish) => void;
   deleteDish: (dishId: string, restaurantId: string) => void;
+  removeRestaurant: (id: string) => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -40,6 +41,10 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const getRestaurant = (id: string) => {
     return restaurants.find((r) => r.id === id);
+  };
+
+  const removeRestaurant = (id: string) => {
+    setRestaurants((prev) => prev.filter(restaurant => restaurant.id !== id));
   };
 
   const addDish = (restaurantId: string, newDish: Omit<Dish, 'id' | 'restaurantId'>) => {
@@ -94,7 +99,8 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     getRestaurant,
     addDish,
     updateDish,
-    deleteDish
+    deleteDish,
+    removeRestaurant
   };
 
   return (
