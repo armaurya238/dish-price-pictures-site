@@ -11,6 +11,7 @@ import Admin from "./pages/Admin";
 import RestaurantAdmin from "./pages/RestaurantAdmin";
 import RestaurantPage from "./pages/RestaurantPage";
 import { RestaurantProvider } from "./context/RestaurantContext";
+import NavBar from "./components/NavBar";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <NavBar />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/dish/:id" element={<DishDetail />} />
