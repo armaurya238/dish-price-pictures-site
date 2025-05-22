@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useRestaurants } from '../context/RestaurantContext';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +22,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Restaurant } from 'lucide-react';
+import { Plus, Utensils } from 'lucide-react';
 
 const Admin = () => {
   const { restaurants, addRestaurant } = useRestaurants();
@@ -185,7 +184,7 @@ const Admin = () => {
           ))
         ) : (
           <div className="col-span-full flex flex-col items-center justify-center p-12 border border-dashed rounded-lg">
-            <Restaurant className="h-12 w-12 text-gray-400 mb-4" />
+            <Utensils className="h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-1">No restaurants yet</h3>
             <p className="text-gray-500 mb-4">Start by adding your first restaurant</p>
             <Button onClick={() => setIsDialogOpen(true)}>
