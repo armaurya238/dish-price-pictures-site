@@ -1,10 +1,21 @@
-
 import React from 'react';
 import Hero from '@/components/Hero';
 import MenuNav from '@/components/MenuNav';
 import MenuSection from '@/components/MenuSection';
 import Footer from '@/components/Footer';
 import { Dish } from '@/components/MenuSection';
+
+// Make dish data available globally for the DishDetail page
+declare global {
+  interface Window {
+    starterDishes: Dish[];
+    mainDishes: Dish[];
+    seafoodDishes: Dish[];
+    vegetarianDishes: Dish[];
+    dessertDishes: Dish[];
+    drinkItems: Dish[];
+  }
+}
 
 const Index = () => {
   const restaurantInfo = {
@@ -167,6 +178,16 @@ const Index = () => {
       imageUrl: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=1964&auto=format"
     }
   ];
+
+  // Make dish data available globally for the DishDetail page
+  React.useEffect(() => {
+    window.starterDishes = starterDishes;
+    window.mainDishes = mainDishes;
+    window.seafoodDishes = seafoodDishes;
+    window.vegetarianDishes = vegetarianDishes;
+    window.dessertDishes = dessertDishes;
+    window.drinkItems = drinkItems;
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">

@@ -32,6 +32,7 @@ const MenuSection: React.FC<MenuSectionProps> = ({ id, title, description, dishe
           {dishes.map((dish) => (
             <DishCard
               key={dish.id}
+              id={dish.id}
               name={dish.name}
               description={dish.description}
               price={dish.price}

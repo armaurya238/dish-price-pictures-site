@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 interface DishCardProps {
+  id: string;
   name: string;
   description: string;
   price: string;
@@ -10,12 +12,15 @@ interface DishCardProps {
   className?: string;
 }
 
-const DishCard: React.FC<DishCardProps> = ({ name, description, price, imageUrl, className }) => {
+const DishCard: React.FC<DishCardProps> = ({ id, name, description, price, imageUrl, className }) => {
   return (
-    <div className={cn(
-      "group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200",
-      className
-    )}>
+    <Link 
+      to={`/dish/${id}`} 
+      className={cn(
+        "group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 block",
+        className
+      )}
+    >
       <div className="aspect-[4/3] w-full overflow-hidden">
         <img
           src={imageUrl}
@@ -30,7 +35,7 @@ const DishCard: React.FC<DishCardProps> = ({ name, description, price, imageUrl,
         </div>
         <p className="mt-2 text-sm text-gray-600 line-clamp-3">{description}</p>
       </div>
-    </div>
+    </Link>
   );
 };
 
