@@ -10,6 +10,8 @@ import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import RestaurantAdmin from "./pages/RestaurantAdmin";
 import RestaurantPage from "./pages/RestaurantPage";
+import Login from "./pages/Login";
+import OwnerDashboard from "./pages/OwnerDashboard";
 import { RestaurantProvider } from "./context/RestaurantContext";
 import NavBar from "./components/NavBar";
 
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/restaurant/:id" element={<RestaurantAdmin />} />
             <Route path="/restaurant/:id" element={<RestaurantPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/owner/dashboard" element={<OwnerDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

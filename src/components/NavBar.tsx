@@ -1,9 +1,18 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useRestaurants } from '../context/RestaurantContext';
 
 const NavBar = () => {
+  const { currentOwner, logout } = useRestaurants();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <nav className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -12,9 +21,26 @@ const NavBar = () => {
           <Button variant="outline" asChild>
             <Link to="/">Home</Link>
           </Button>
-          <Button variant="default" asChild>
-            <Link to="/admin">Admin Dashboard</Link>
-          </Button>
+          
+          {currentOwner ? (
+            <>
+              <Button variant="outline" asChild>
+                <Link to="/owner/dashboard">My Restaurant</Link>
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" asChild>
+                <Link to="/login">Restaurant Login</Link>
+              </Button>
+              <Button variant="default" asChild>
+                <Link to="/admin">Admin Dashboard</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>

@@ -16,3 +16,10 @@ export interface Dish {
   imageUrl: string;
   restaurantId: string;
 }
+
+export interface RestaurantOwner {
+  id: string;
+  username: string;
+  password: string; // In a real app, we would hash this
+  restaurantId: string;
+}

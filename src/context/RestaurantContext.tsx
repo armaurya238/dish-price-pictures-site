@@ -1,15 +1,20 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Restaurant, Dish } from '../types/restaurant';
+import { Restaurant, Dish, RestaurantOwner } from '../types/restaurant';
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
-  addRestaurant: (restaurant: Omit<Restaurant, 'id'>) => string;
+  addRestaurant: (restaurant: Omit<Restaurant, 'id'>, username: string, password: string) => string;
   getRestaurant: (id: string) => Restaurant | undefined;
   addDish: (restaurantId: string, dish: Omit<Dish, 'id' | 'restaurantId'>) => void;
   updateDish: (dish: Dish) => void;
   deleteDish: (dishId: string, restaurantId: string) => void;
   removeRestaurant: (id: string) => void;
+  authenticateOwner: (username: string, password: string) => string | null;
+  restaurantOwners: RestaurantOwner[];
+  currentOwner: RestaurantOwner | null;
+  setCurrentOwner: (owner: RestaurantOwner | null) => void;
+  logout: () => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -28,14 +33,46 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return storedData ? JSON.parse(storedData) : [];
   });
 
+  const [restaurantOwners, setRestaurantOwners] = useState<RestaurantOwner[]>(() => {
+    const storedOwners = localStorage.getItem('restaurantOwners');
+    return storedOwners ? JSON.parse(storedOwners) : [];
+  });
+
+  const [currentOwner, setCurrentOwner] = useState<RestaurantOwner | null>(() => {
+    const storedOwner = localStorage.getItem('currentOwner');
+    return storedOwner ? JSON.parse(storedOwner) : null;
+  });
+
   useEffect(() => {
     localStorage.setItem('restaurants', JSON.stringify(restaurants));
   }, [restaurants]);
 
-  const addRestaurant = (newRestaurant: Omit<Restaurant, 'id'>) => {
+  useEffect(() => {
+    localStorage.setItem('restaurantOwners', JSON.stringify(restaurantOwners));
+  }, [restaurantOwners]);
+
+  useEffect(() => {
+    if (currentOwner) {
+      localStorage.setItem('currentOwner', JSON.stringify(currentOwner));
+    } else {
+      localStorage.removeItem('currentOwner');
+    }
+  }, [currentOwner]);
+
+  const addRestaurant = (newRestaurant: Omit<Restaurant, 'id'>, username: string, password: string) => {
     const id = `restaurant-${Date.now()}`;
     const restaurant = { ...newRestaurant, id };
     setRestaurants((prev) => [...prev, restaurant]);
+    
+    // Create restaurant owner credentials
+    const owner: RestaurantOwner = {
+      id: `owner-${Date.now()}`,
+      username,
+      password, // In a real app, we would hash this
+      restaurantId: id
+    };
+    
+    setRestaurantOwners((prev) => [...prev, owner]);
     return id;
   };
 
@@ -45,6 +82,8 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const removeRestaurant = (id: string) => {
     setRestaurants((prev) => prev.filter(restaurant => restaurant.id !== id));
+    // Also remove the owner
+    setRestaurantOwners((prev) => prev.filter(owner => owner.restaurantId !== id));
   };
 
   const addDish = (restaurantId: string, newDish: Omit<Dish, 'id' | 'restaurantId'>) => {
@@ -93,6 +132,23 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     );
   };
 
+  const authenticateOwner = (username: string, password: string): string | null => {
+    const owner = restaurantOwners.find(
+      (owner) => owner.username === username && owner.password === password
+    );
+    
+    if (owner) {
+      setCurrentOwner(owner);
+      return owner.restaurantId;
+    }
+    
+    return null;
+  };
+
+  const logout = () => {
+    setCurrentOwner(null);
+  };
+
   const value = {
     restaurants,
     addRestaurant,
@@ -100,7 +156,12 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     addDish,
     updateDish,
     deleteDish,
-    removeRestaurant
+    removeRestaurant,
+    authenticateOwner,
+    restaurantOwners,
+    currentOwner,
+    setCurrentOwner,
+    logout
   };
 
   return (

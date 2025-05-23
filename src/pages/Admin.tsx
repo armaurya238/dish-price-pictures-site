@@ -32,6 +32,8 @@ const Admin = () => {
   const [restaurantDescription, setRestaurantDescription] = useState('');
   const [restaurantLogo, setRestaurantLogo] = useState('');
   const [restaurantCover, setRestaurantCover] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDelisting, setIsDelisting] = useState(false);
@@ -48,19 +50,30 @@ const Admin = () => {
       return;
     }
 
-    const newRestaurantId = addRestaurant({
-      name: restaurantName,
-      description: restaurantDescription,
-      logoUrl: restaurantLogo || 'https://source.unsplash.com/random/?restaurant,logo',
-      coverImageUrl: restaurantCover || 'https://source.unsplash.com/random/?restaurant,food',
-      dishes: []
-    });
+    if (!username.trim() || !password.trim()) {
+      toast.error('Username and password are required for restaurant owner');
+      return;
+    }
 
-    toast.success(`Restaurant ${restaurantName} has been added!`);
+    const newRestaurantId = addRestaurant(
+      {
+        name: restaurantName,
+        description: restaurantDescription,
+        logoUrl: restaurantLogo || 'https://source.unsplash.com/random/?restaurant,logo',
+        coverImageUrl: restaurantCover || 'https://source.unsplash.com/random/?restaurant,food',
+        dishes: []
+      }, 
+      username, 
+      password
+    );
+
+    toast.success(`Restaurant ${restaurantName} has been added with owner account!`);
     setRestaurantName('');
     setRestaurantDescription('');
     setRestaurantLogo('');
     setRestaurantCover('');
+    setUsername('');
+    setPassword('');
     setIsDialogOpen(false);
     
     // Navigate to the restaurant menu management page
@@ -147,6 +160,35 @@ const Admin = () => {
                   value={restaurantCover}
                   onChange={(e) => setRestaurantCover(e.target.value)}
                   placeholder="Cover image URL (optional)"
+                />
+              </div>
+              
+              <div className="border-t my-2"></div>
+              <h3 className="font-medium">Owner Account Details</h3>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="username" className="text-right col-span-1">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  className="col-span-3"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Owner's username"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="password" className="text-right col-span-1">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  className="col-span-3"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Owner's password"
                 />
               </div>
             </div>
