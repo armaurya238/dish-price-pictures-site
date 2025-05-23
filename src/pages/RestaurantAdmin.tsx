@@ -5,7 +5,7 @@ import { useRestaurants } from '../context/RestaurantContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dish } from '@/types/restaurant';
+import { Dish, Section } from '@/types/restaurant';
 import {
   Dialog,
   DialogContent,
@@ -24,15 +24,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Plus, Trash, LinkIcon } from 'lucide-react';
+import { Plus, Trash, LinkIcon, QrCode, Download } from 'lucide-react';
+import SectionManager from '@/components/SectionManager';
+import QRCode from 'qrcode.react';
 
 const RestaurantAdmin = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getRestaurant, addDish, updateDish, deleteDish } = useRestaurants();
+  const { getRestaurant, addDish, updateDish, deleteDish, addSection, updateSection, deleteSection } = useRestaurants();
   const [restaurant, setRestaurant] = useState(getRestaurant(id || ''));
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDish, setEditingDish] = useState<Dish | null>(null);
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [isQrDialogOpen, setIsQrDialogOpen] = useState(false);
   
   // Form state
   const [dishName, setDishName] = useState('');
@@ -46,7 +50,12 @@ const RestaurantAdmin = () => {
       navigate('/admin');
       return;
     }
-  }, [restaurant, navigate]);
+    
+    // Set default selected section if there are sections
+    if (restaurant.sections?.length > 0 && !selectedSectionId) {
+      setSelectedSectionId(restaurant.sections[0].id);
+    }
+  }, [restaurant, navigate, selectedSectionId]);
 
   useEffect(() => {
     // Refresh restaurant data when changes occur
@@ -54,6 +63,16 @@ const RestaurantAdmin = () => {
   }, [id, getRestaurant]);
 
   const handleOpenAddDishDialog = () => {
+    if (!selectedSectionId && restaurant?.sections.length > 0) {
+      toast.error('Please select a section first');
+      return;
+    }
+    
+    if (restaurant?.sections.length === 0) {
+      toast.error('Please create a section first before adding dishes');
+      return;
+    }
+    
     setEditingDish(null);
     setDishName('');
     setDishDescription('');
@@ -77,6 +96,11 @@ const RestaurantAdmin = () => {
       return;
     }
 
+    if (!selectedSectionId && restaurant?.sections.length > 0) {
+      toast.error('Please select a section first');
+      return;
+    }
+
     const imageUrl = dishImageUrl || 'https://source.unsplash.com/random/?food,dish';
 
     if (editingDish) {
@@ -86,12 +110,13 @@ const RestaurantAdmin = () => {
         name: dishName,
         description: dishDescription,
         price: dishPrice,
-        imageUrl
+        imageUrl,
+        sectionId: selectedSectionId || editingDish.sectionId
       });
       toast.success(`${dishName} has been updated!`);
     } else {
       // Add new dish
-      addDish(id || '', {
+      addDish(id || '', selectedSectionId || 'default', {
         name: dishName,
         description: dishDescription,
         price: dishPrice,
@@ -113,6 +138,52 @@ const RestaurantAdmin = () => {
       toast.success(`${dish.name} has been removed from the menu`);
     }
   };
+
+  const handleAddSection = (name: string, description: string) => {
+    const newSectionId = addSection(id || '', { name, description });
+    setSelectedSectionId(newSectionId);
+  };
+
+  const handleEditSection = (section: Section) => {
+    updateSection(section);
+  };
+
+  const handleDeleteSection = (sectionId: string) => {
+    deleteSection(sectionId, id || '');
+    
+    // If the deleted section was selected, select another one
+    if (selectedSectionId === sectionId) {
+      const remainingSections = restaurant?.sections.filter(s => s.id !== sectionId);
+      if (remainingSections?.length > 0) {
+        setSelectedSectionId(remainingSections[0].id);
+      } else {
+        setSelectedSectionId(null);
+      }
+    }
+  };
+  
+  const handleDownloadQR = () => {
+    const canvas = document.getElementById('restaurant-qrcode') as HTMLCanvasElement;
+    if (canvas) {
+      const pngUrl = canvas
+        .toDataURL('image/png')
+        .replace('image/png', 'image/octet-stream');
+      
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      downloadLink.download = `${restaurant?.name.replace(/\s+/g, '-').toLowerCase()}-qrcode.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+  };
+
+  const restaurantUrl = `${window.location.origin}/restaurant/${id}`;
+
+  // Get dishes for the selected section
+  const sectionDishes = restaurant?.dishes.filter(
+    dish => dish.sectionId === selectedSectionId
+  ) || [];
 
   if (!restaurant) {
     return <div>Loading...</div>;
@@ -141,12 +212,51 @@ const RestaurantAdmin = () => {
           </Button>
           <Button 
             variant="outline"
+            onClick={() => setIsQrDialogOpen(true)}
+          >
+            <QrCode className="mr-2 h-4 w-4" />
+            QR Code
+          </Button>
+          <Button 
+            variant="outline"
             onClick={() => navigate(`/restaurant/${restaurant.id}`)}
           >
             View Public Page
           </Button>
         </div>
       </div>
+
+      <Dialog open={isQrDialogOpen} onOpenChange={setIsQrDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Restaurant QR Code</DialogTitle>
+            <DialogDescription>
+              Customers can scan this QR code to view your restaurant menu
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-4">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <QRCode 
+                id="restaurant-qrcode"
+                value={restaurantUrl} 
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">{restaurantUrl}</p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsQrDialogOpen(false)} variant="outline">
+              Close
+            </Button>
+            <Button onClick={handleDownloadQR}>
+              <Download className="mr-2 h-4 w-4" />
+              Download QR Code
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="mb-8 p-6 border rounded-lg bg-white">
         <h2 className="text-xl font-semibold mb-4">Restaurant Details</h2>
@@ -162,8 +272,23 @@ const RestaurantAdmin = () => {
         </div>
       </div>
 
+      {/* Section Manager */}
+      <SectionManager 
+        restaurantId={id || ''}
+        sections={restaurant.sections || []}
+        onAddSection={handleAddSection}
+        onEditSection={handleEditSection}
+        onDeleteSection={handleDeleteSection}
+        onSelectSection={setSelectedSectionId}
+        selectedSectionId={selectedSectionId}
+      />
+
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Menu Items ({restaurant.dishes?.length || 0})</h2>
+        <h2 className="text-2xl font-bold">
+          {selectedSectionId 
+            ? `Menu Items in ${restaurant.sections.find(s => s.id === selectedSectionId)?.name || 'Selected Section'} (${sectionDishes.length})`
+            : `Menu Items (${restaurant.dishes?.length || 0})`}
+        </h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleOpenAddDishDialog}>
@@ -255,7 +380,7 @@ const RestaurantAdmin = () => {
         </Dialog>
       </div>
 
-      {restaurant.dishes && restaurant.dishes.length > 0 ? (
+      {sectionDishes && sectionDishes.length > 0 ? (
         <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
@@ -268,7 +393,7 @@ const RestaurantAdmin = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {restaurant.dishes.map((dish) => (
+              {sectionDishes.map((dish) => (
                 <TableRow key={dish.id}>
                   <TableCell>
                     <div className="h-16 w-16 rounded overflow-hidden bg-gray-100">
@@ -308,12 +433,21 @@ const RestaurantAdmin = () => {
         </div>
       ) : (
         <div className="text-center py-12 border rounded-lg">
-          <h3 className="text-lg font-medium mb-2">No dishes in the menu yet</h3>
-          <p className="text-gray-500 mb-4">Start by adding your first dish to the menu</p>
-          <Button onClick={handleOpenAddDishDialog}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Dish
-          </Button>
+          {restaurant.sections?.length > 0 ? (
+            <>
+              <h3 className="text-lg font-medium mb-2">No dishes in this section yet</h3>
+              <p className="text-gray-500 mb-4">Start by adding your first dish to the selected section</p>
+              <Button onClick={handleOpenAddDishDialog}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Dish
+              </Button>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-medium mb-2">Create a section first</h3>
+              <p className="text-gray-500 mb-4">You need to create at least one section before adding dishes</p>
+            </>
+          )}
         </div>
       )}
     </div>

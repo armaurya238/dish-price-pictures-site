@@ -1,12 +1,20 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useRestaurants } from '../context/RestaurantContext';
 
 const NavBar = () => {
   const { currentOwner, logout } = useRestaurants();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Hide navigation on restaurant pages
+  const isRestaurantPage = location.pathname.startsWith('/restaurant/');
+  
+  if (isRestaurantPage) {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();

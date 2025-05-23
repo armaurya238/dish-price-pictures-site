@@ -6,6 +6,14 @@ export interface Restaurant {
   logoUrl?: string;
   coverImageUrl?: string;
   dishes: Dish[];
+  sections: Section[];
+}
+
+export interface Section {
+  id: string;
+  name: string;
+  description?: string;
+  restaurantId: string;
 }
 
 export interface Dish {
@@ -15,6 +23,7 @@ export interface Dish {
   price: string;
   imageUrl: string;
   restaurantId: string;
+  sectionId: string;
 }
 
 export interface RestaurantOwner {

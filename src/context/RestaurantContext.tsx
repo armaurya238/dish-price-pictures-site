@@ -1,12 +1,12 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Restaurant, Dish, RestaurantOwner } from '../types/restaurant';
+import { Restaurant, Dish, RestaurantOwner, Section } from '../types/restaurant';
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
   addRestaurant: (restaurant: Omit<Restaurant, 'id'>, username: string, password: string) => string;
   getRestaurant: (id: string) => Restaurant | undefined;
-  addDish: (restaurantId: string, dish: Omit<Dish, 'id' | 'restaurantId'>) => void;
+  addDish: (restaurantId: string, sectionId: string, dish: Omit<Dish, 'id' | 'restaurantId' | 'sectionId'>) => void;
   updateDish: (dish: Dish) => void;
   deleteDish: (dishId: string, restaurantId: string) => void;
   removeRestaurant: (id: string) => void;
@@ -15,6 +15,9 @@ interface RestaurantContextType {
   currentOwner: RestaurantOwner | null;
   setCurrentOwner: (owner: RestaurantOwner | null) => void;
   logout: () => void;
+  addSection: (restaurantId: string, section: Omit<Section, 'id' | 'restaurantId'>) => string;
+  updateSection: (section: Section) => void;
+  deleteSection: (sectionId: string, restaurantId: string) => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
@@ -30,7 +33,19 @@ export const useRestaurants = () => {
 export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
     const storedData = localStorage.getItem('restaurants');
-    return storedData ? JSON.parse(storedData) : [];
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      // Handle data migration for existing restaurants that don't have sections
+      return parsedData.map((restaurant: any) => ({
+        ...restaurant,
+        sections: restaurant.sections || [],
+        dishes: restaurant.dishes.map((dish: any) => ({
+          ...dish,
+          sectionId: dish.sectionId || 'default'
+        }))
+      }));
+    }
+    return [];
   });
 
   const [restaurantOwners, setRestaurantOwners] = useState<RestaurantOwner[]>(() => {
@@ -61,7 +76,13 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const addRestaurant = (newRestaurant: Omit<Restaurant, 'id'>, username: string, password: string) => {
     const id = `restaurant-${Date.now()}`;
-    const restaurant = { ...newRestaurant, id };
+    const restaurant = { 
+      ...newRestaurant, 
+      id,
+      sections: [],
+      dishes: newRestaurant.dishes || [] 
+    };
+    
     setRestaurants((prev) => [...prev, restaurant]);
     
     // Create restaurant owner credentials
@@ -86,7 +107,66 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setRestaurantOwners((prev) => prev.filter(owner => owner.restaurantId !== id));
   };
 
-  const addDish = (restaurantId: string, newDish: Omit<Dish, 'id' | 'restaurantId'>) => {
+  const addSection = (restaurantId: string, newSection: Omit<Section, 'id' | 'restaurantId'>) => {
+    const sectionId = `section-${Date.now()}`;
+    
+    setRestaurants((prevRestaurants) => 
+      prevRestaurants.map((restaurant) => {
+        if (restaurant.id === restaurantId) {
+          return {
+            ...restaurant,
+            sections: [...restaurant.sections, { ...newSection, id: sectionId, restaurantId }]
+          };
+        }
+        return restaurant;
+      })
+    );
+
+    return sectionId;
+  };
+
+  const updateSection = (updatedSection: Section) => {
+    setRestaurants((prevRestaurants) => 
+      prevRestaurants.map((restaurant) => {
+        if (restaurant.id === updatedSection.restaurantId) {
+          return {
+            ...restaurant,
+            sections: restaurant.sections.map((section) => 
+              section.id === updatedSection.id ? updatedSection : section
+            )
+          };
+        }
+        return restaurant;
+      })
+    );
+  };
+
+  const deleteSection = (sectionId: string, restaurantId: string) => {
+    setRestaurants((prevRestaurants) => 
+      prevRestaurants.map((restaurant) => {
+        if (restaurant.id === restaurantId) {
+          // First, filter out the section
+          const updatedSections = restaurant.sections.filter(
+            (section) => section.id !== sectionId
+          );
+          
+          // Then, filter out all dishes that were in this section
+          const updatedDishes = restaurant.dishes.filter(
+            (dish) => dish.sectionId !== sectionId
+          );
+          
+          return {
+            ...restaurant,
+            sections: updatedSections,
+            dishes: updatedDishes
+          };
+        }
+        return restaurant;
+      })
+    );
+  };
+
+  const addDish = (restaurantId: string, sectionId: string, newDish: Omit<Dish, 'id' | 'restaurantId' | 'sectionId'>) => {
     const dishId = `dish-${Date.now()}`;
     
     setRestaurants((prevRestaurants) => 
@@ -94,7 +174,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (restaurant.id === restaurantId) {
           return {
             ...restaurant,
-            dishes: [...restaurant.dishes, { ...newDish, id: dishId, restaurantId }]
+            dishes: [...restaurant.dishes, { ...newDish, id: dishId, restaurantId, sectionId }]
           };
         }
         return restaurant;
@@ -161,7 +241,10 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     restaurantOwners,
     currentOwner,
     setCurrentOwner,
-    logout
+    logout,
+    addSection,
+    updateSection,
+    deleteSection
   };
 
   return (

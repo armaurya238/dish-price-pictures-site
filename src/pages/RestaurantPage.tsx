@@ -29,17 +29,6 @@ const RestaurantPage = () => {
     );
   }
 
-  // Group dishes by their first letter for simplicity
-  // In a real app, you might want to group by category instead
-  const dishGroups = restaurant.dishes.reduce((groups: Record<string, typeof restaurant.dishes>, dish) => {
-    const firstLetter = dish.name.charAt(0).toUpperCase();
-    if (!groups[firstLetter]) {
-      groups[firstLetter] = [];
-    }
-    groups[firstLetter].push(dish);
-    return groups;
-  }, {});
-
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -72,21 +61,21 @@ const RestaurantPage = () => {
         </div>
       </section>
 
-      {/* Navigation */}
+      {/* Restaurant Navigation */}
       <nav className="bg-white shadow-md sticky top-0 z-10">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             <h2 className="text-xl font-bold">{restaurant.name}</h2>
             <div className="flex space-x-4">
-              {Object.keys(dishGroups).length > 1 && (
+              {restaurant.sections && restaurant.sections.length > 0 && (
                 <div className="hidden md:flex items-center space-x-4">
-                  {Object.keys(dishGroups).sort().map((group) => (
+                  {restaurant.sections.map((section) => (
                     <a
-                      key={group}
-                      href={`#section-${group}`}
+                      key={section.id}
+                      href={`#section-${section.id}`}
                       className="text-gray-700 hover:text-gray-900 text-sm font-medium"
                     >
-                      {group}
+                      {section.name}
                     </a>
                   ))}
                 </div>
@@ -98,17 +87,19 @@ const RestaurantPage = () => {
 
       {/* Menu Sections */}
       <div className="container mx-auto px-4 py-8">
-        {Object.keys(dishGroups).length > 0 ? (
-          Object.entries(dishGroups)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([group, dishes]) => (
+        {restaurant.sections && restaurant.sections.length > 0 ? (
+          restaurant.sections.map((section) => {
+            const sectionDishes = restaurant.dishes.filter(dish => dish.sectionId === section.id);
+            return (
               <MenuSection
-                key={group}
-                id={`section-${group}`}
-                title={`${group} Section`}
-                dishes={dishes}
+                key={section.id}
+                id={`section-${section.id}`}
+                title={section.name}
+                description={section.description}
+                dishes={sectionDishes}
               />
-            ))
+            );
+          })
         ) : (
           <div className="text-center py-16">
             <h2 className="text-2xl font-bold mb-2">No menu items available</h2>
