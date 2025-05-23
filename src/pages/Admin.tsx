@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useRestaurants } from '../context/RestaurantContext';
 import { useNavigate } from 'react-router-dom';
@@ -61,7 +60,8 @@ const Admin = () => {
         description: restaurantDescription,
         logoUrl: restaurantLogo || 'https://source.unsplash.com/random/?restaurant,logo',
         coverImageUrl: restaurantCover || 'https://source.unsplash.com/random/?restaurant,food',
-        dishes: []
+        dishes: [],
+        sections: [] // Make sure to include this property
       }, 
       username, 
       password
