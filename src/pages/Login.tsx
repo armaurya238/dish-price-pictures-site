@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { authenticateOwner } = useRestaurants();
   const navigate = useNavigate();
 
@@ -28,6 +29,8 @@ const Login = () => {
       return;
     }
     
+    setIsLoading(true);
+    
     const restaurantId = authenticateOwner(username, password);
     if (restaurantId) {
       toast.success('Login successful!');
@@ -35,13 +38,15 @@ const Login = () => {
     } else {
       toast.error('Invalid username or password');
     }
+    
+    setIsLoading(false);
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 flex items-center justify-center">
-      <Card className="w-full max-w-md">
+    <div className="container mx-auto px-4 py-8 sm:py-16 flex items-center justify-center min-h-screen">
+      <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Restaurant Owner Login</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">Restaurant Owner Login</CardTitle>
           <CardDescription>
             Login to manage your restaurant menu
           </CardDescription>
@@ -58,6 +63,7 @@ const Login = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -70,12 +76,13 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                disabled={isLoading}
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit">
-              Login
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </CardFooter>
         </form>

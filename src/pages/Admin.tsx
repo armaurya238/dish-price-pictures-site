@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useRestaurants } from '../context/RestaurantContext';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +22,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Utensils, Search, Trash } from 'lucide-react';
+import { Plus, Utensils, Search, Trash, Upload } from 'lucide-react';
 
 const Admin = () => {
   const { restaurants, addRestaurant, removeRestaurant } = useRestaurants();
@@ -95,28 +94,45 @@ const Admin = () => {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        if (type === 'logo') {
+          setRestaurantLogo(result);
+        } else {
+          setRestaurantCover(result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Restaurant Admin Dashboard</h1>
+    <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Restaurant Admin Dashboard</h1>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add New Restaurant
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto m-2">
             <DialogHeader>
               <DialogTitle>Add New Restaurant</DialogTitle>
               <DialogDescription>
                 Enter details about the new restaurant you want to onboard.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-6 py-4">
+            <div className="grid gap-4 py-4">
               <div className="space-y-4">
                 <h3 className="font-medium text-lg">Restaurant Information</h3>
+                
                 <div className="space-y-2">
                   <label htmlFor="name" className="text-sm font-medium">
                     Restaurant Name *
@@ -143,63 +159,79 @@ const Admin = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <label htmlFor="logo" className="text-sm font-medium">
-                    Logo URL (Optional)
+                  <label className="text-sm font-medium">
+                    Logo Image (Recommended: 200x200px, square format)
                   </label>
-                  <Input
-                    id="logo"
-                    value={restaurantLogo}
-                    onChange={(e) => setRestaurantLogo(e.target.value)}
-                    placeholder="https://example.com/logo.jpg"
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, 'logo')}
+                      className="cursor-pointer"
+                    />
+                    {restaurantLogo && (
+                      <div className="h-20 w-20 rounded border overflow-hidden">
+                        <img src={restaurantLogo} alt="Logo preview" className="h-full w-full object-cover" />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <label htmlFor="cover" className="text-sm font-medium">
-                    Cover Image URL (Optional)
+                  <label className="text-sm font-medium">
+                    Cover Image (Recommended: 1200x400px, landscape format)
                   </label>
-                  <Input
-                    id="cover"
-                    value={restaurantCover}
-                    onChange={(e) => setRestaurantCover(e.target.value)}
-                    placeholder="https://example.com/cover.jpg"
-                  />
+                  <div className="flex flex-col gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, 'cover')}
+                      className="cursor-pointer"
+                    />
+                    {restaurantCover && (
+                      <div className="h-24 w-full rounded border overflow-hidden">
+                        <img src={restaurantCover} alt="Cover preview" className="h-full w-full object-cover" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               
               <div className="border-t pt-4 space-y-4">
                 <h3 className="font-medium text-lg">Owner Account Details</h3>
-                <div className="space-y-2">
-                  <label htmlFor="username" className="text-sm font-medium">
-                    Username *
-                  </label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Owner's login username"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium">
-                    Password *
-                  </label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Owner's login password"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label htmlFor="username" className="text-sm font-medium">
+                      Username *
+                    </label>
+                    <Input
+                      id="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Owner's login username"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label htmlFor="password" className="text-sm font-medium">
+                      Password *
+                    </label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Owner's login password"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={handleAddRestaurant}>Add Restaurant</Button>
+              <Button onClick={handleAddRestaurant} className="w-full sm:w-auto">Add Restaurant</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -218,7 +250,7 @@ const Admin = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {filteredRestaurants.length > 0 ? (
           filteredRestaurants.map(restaurant => (
             <Card key={restaurant.id} className="overflow-hidden">

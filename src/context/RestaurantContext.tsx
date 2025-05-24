@@ -1,249 +1,230 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Restaurant, Dish, RestaurantOwner, Section } from '../types/restaurant';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Restaurant, Dish, Section } from '@/types/restaurant';
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
+  currentUser: { restaurantId: string; username: string } | null;
   addRestaurant: (restaurant: Omit<Restaurant, 'id'>, username: string, password: string) => string;
+  removeRestaurant: (id: string) => void;
   getRestaurant: (id: string) => Restaurant | undefined;
   addDish: (restaurantId: string, sectionId: string, dish: Omit<Dish, 'id' | 'restaurantId' | 'sectionId'>) => void;
   updateDish: (dish: Dish) => void;
   deleteDish: (dishId: string, restaurantId: string) => void;
-  removeRestaurant: (id: string) => void;
-  authenticateOwner: (username: string, password: string) => string | null;
-  restaurantOwners: RestaurantOwner[];
-  currentOwner: RestaurantOwner | null;
-  setCurrentOwner: (owner: RestaurantOwner | null) => void;
-  logout: () => void;
-  addSection: (restaurantId: string, section: Omit<Section, 'id' | 'restaurantId'>) => string;
+  addSection: (restaurantId: string, section: Omit<Section, 'id'>) => string;
   updateSection: (section: Section) => void;
   deleteSection: (sectionId: string, restaurantId: string) => void;
+  authenticateOwner: (username: string, password: string) => string | null;
+  logout: () => void;
 }
 
 const RestaurantContext = createContext<RestaurantContextType | undefined>(undefined);
 
-export const useRestaurants = () => {
-  const context = useContext(RestaurantContext);
-  if (!context) {
-    throw new Error('useRestaurants must be used within a RestaurantProvider');
-  }
-  return context;
-};
+interface OwnerCredentials {
+  restaurantId: string;
+  username: string;
+  password: string;
+}
 
 export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>(() => {
-    const storedData = localStorage.getItem('restaurants');
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      // Handle data migration for existing restaurants that don't have sections
-      return parsedData.map((restaurant: any) => ({
-        ...restaurant,
-        sections: restaurant.sections || [],
-        dishes: restaurant.dishes.map((dish: any) => ({
-          ...dish,
-          sectionId: dish.sectionId || 'default'
-        }))
-      }));
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [ownerCredentials, setOwnerCredentials] = useState<OwnerCredentials[]>([]);
+  const [currentUser, setCurrentUser] = useState<{ restaurantId: string; username: string } | null>(null);
+
+  useEffect(() => {
+    const storedRestaurants = localStorage.getItem('restaurants');
+    if (storedRestaurants) {
+      setRestaurants(JSON.parse(storedRestaurants));
     }
-    return [];
-  });
 
-  const [restaurantOwners, setRestaurantOwners] = useState<RestaurantOwner[]>(() => {
-    const storedOwners = localStorage.getItem('restaurantOwners');
-    return storedOwners ? JSON.parse(storedOwners) : [];
-  });
-
-  const [currentOwner, setCurrentOwner] = useState<RestaurantOwner | null>(() => {
-    const storedOwner = localStorage.getItem('currentOwner');
-    return storedOwner ? JSON.parse(storedOwner) : null;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('restaurants', JSON.stringify(restaurants));
-  }, [restaurants]);
-
-  useEffect(() => {
-    localStorage.setItem('restaurantOwners', JSON.stringify(restaurantOwners));
-  }, [restaurantOwners]);
-
-  useEffect(() => {
-    if (currentOwner) {
-      localStorage.setItem('currentOwner', JSON.stringify(currentOwner));
-    } else {
-      localStorage.removeItem('currentOwner');
+    const storedCredentials = localStorage.getItem('ownerCredentials');
+    if (storedCredentials) {
+      setOwnerCredentials(JSON.parse(storedCredentials));
     }
-  }, [currentOwner]);
+  }, []);
 
-  const addRestaurant = (newRestaurant: Omit<Restaurant, 'id'>, username: string, password: string) => {
-    const id = `restaurant-${Date.now()}`;
-    const restaurant = { 
-      ...newRestaurant, 
+  const addRestaurant = (restaurant: Omit<Restaurant, 'id'>, username: string, password: string): string => {
+    const id = Date.now().toString();
+    const newRestaurant: Restaurant = {
+      ...restaurant,
       id,
-      sections: [],
-      dishes: newRestaurant.dishes || [] 
+      dishes: [],
+      sections: []
     };
     
-    setRestaurants((prev) => [...prev, restaurant]);
-    
-    // Create restaurant owner credentials
-    const owner: RestaurantOwner = {
-      id: `owner-${Date.now()}`,
+    const updatedRestaurants = [...restaurants, newRestaurant];
+    const newCredentials: OwnerCredentials = {
+      restaurantId: id,
       username,
-      password, // In a real app, we would hash this
-      restaurantId: id
+      password
     };
+    const updatedCredentials = [...ownerCredentials, newCredentials];
     
-    setRestaurantOwners((prev) => [...prev, owner]);
+    setRestaurants(updatedRestaurants);
+    setOwnerCredentials(updatedCredentials);
+    
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+    localStorage.setItem('ownerCredentials', JSON.stringify(updatedCredentials));
+    
     return id;
   };
 
-  const getRestaurant = (id: string) => {
-    return restaurants.find((r) => r.id === id);
-  };
-
-  const removeRestaurant = (id: string) => {
-    setRestaurants((prev) => prev.filter(restaurant => restaurant.id !== id));
-    // Also remove the owner
-    setRestaurantOwners((prev) => prev.filter(owner => owner.restaurantId !== id));
-  };
-
-  const addSection = (restaurantId: string, newSection: Omit<Section, 'id' | 'restaurantId'>) => {
-    const sectionId = `section-${Date.now()}`;
-    
-    setRestaurants((prevRestaurants) => 
-      prevRestaurants.map((restaurant) => {
-        if (restaurant.id === restaurantId) {
-          return {
-            ...restaurant,
-            sections: [...restaurant.sections, { ...newSection, id: sectionId, restaurantId }]
-          };
-        }
-        return restaurant;
-      })
-    );
-
-    return sectionId;
-  };
-
-  const updateSection = (updatedSection: Section) => {
-    setRestaurants((prevRestaurants) => 
-      prevRestaurants.map((restaurant) => {
-        if (restaurant.id === updatedSection.restaurantId) {
-          return {
-            ...restaurant,
-            sections: restaurant.sections.map((section) => 
-              section.id === updatedSection.id ? updatedSection : section
-            )
-          };
-        }
-        return restaurant;
-      })
-    );
-  };
-
-  const deleteSection = (sectionId: string, restaurantId: string) => {
-    setRestaurants((prevRestaurants) => 
-      prevRestaurants.map((restaurant) => {
-        if (restaurant.id === restaurantId) {
-          // First, filter out the section
-          const updatedSections = restaurant.sections.filter(
-            (section) => section.id !== sectionId
-          );
-          
-          // Then, filter out all dishes that were in this section
-          const updatedDishes = restaurant.dishes.filter(
-            (dish) => dish.sectionId !== sectionId
-          );
-          
-          return {
-            ...restaurant,
-            sections: updatedSections,
-            dishes: updatedDishes
-          };
-        }
-        return restaurant;
-      })
-    );
-  };
-
-  const addDish = (restaurantId: string, sectionId: string, newDish: Omit<Dish, 'id' | 'restaurantId' | 'sectionId'>) => {
-    const dishId = `dish-${Date.now()}`;
-    
-    setRestaurants((prevRestaurants) => 
-      prevRestaurants.map((restaurant) => {
-        if (restaurant.id === restaurantId) {
-          return {
-            ...restaurant,
-            dishes: [...restaurant.dishes, { ...newDish, id: dishId, restaurantId, sectionId }]
-          };
-        }
-        return restaurant;
-      })
-    );
-  };
-
-  const updateDish = (updatedDish: Dish) => {
-    setRestaurants((prevRestaurants) => 
-      prevRestaurants.map((restaurant) => {
-        if (restaurant.id === updatedDish.restaurantId) {
-          return {
-            ...restaurant,
-            dishes: restaurant.dishes.map((dish) => 
-              dish.id === updatedDish.id ? updatedDish : dish
-            )
-          };
-        }
-        return restaurant;
-      })
-    );
-  };
-
-  const deleteDish = (dishId: string, restaurantId: string) => {
-    setRestaurants((prevRestaurants) => 
-      prevRestaurants.map((restaurant) => {
-        if (restaurant.id === restaurantId) {
-          return {
-            ...restaurant,
-            dishes: restaurant.dishes.filter((dish) => dish.id !== dishId)
-          };
-        }
-        return restaurant;
-      })
-    );
-  };
-
   const authenticateOwner = (username: string, password: string): string | null => {
-    const owner = restaurantOwners.find(
-      (owner) => owner.username === username && owner.password === password
+    console.log('Authenticating:', username, password);
+    console.log('Available credentials:', ownerCredentials);
+    
+    const credentials = ownerCredentials.find(
+      cred => cred.username === username && cred.password === password
     );
     
-    if (owner) {
-      setCurrentOwner(owner);
-      return owner.restaurantId;
+    if (credentials) {
+      setCurrentUser({
+        restaurantId: credentials.restaurantId,
+        username: credentials.username
+      });
+      return credentials.restaurantId;
     }
     
     return null;
   };
 
   const logout = () => {
-    setCurrentOwner(null);
+    setCurrentUser(null);
   };
 
-  const value = {
+  const removeRestaurant = (id: string) => {
+    const updatedRestaurants = restaurants.filter(restaurant => restaurant.id !== id);
+    setRestaurants(updatedRestaurants);
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+
+    const updatedCredentials = ownerCredentials.filter(cred => cred.restaurantId !== id);
+    setOwnerCredentials(updatedCredentials);
+    localStorage.setItem('ownerCredentials', JSON.stringify(updatedCredentials));
+  };
+
+  const getRestaurant = (id: string): Restaurant | undefined => {
+    return restaurants.find(restaurant => restaurant.id === id);
+  };
+
+  const addDish = (restaurantId: string, sectionId: string, dish: Omit<Dish, 'id' | 'restaurantId' | 'sectionId'>) => {
+    const id = Date.now().toString();
+    const newDish: Dish = {
+      id,
+      restaurantId,
+      sectionId,
+      ...dish
+    };
+
+    const updatedRestaurants = restaurants.map(restaurant => {
+      if (restaurant.id === restaurantId) {
+        return {
+          ...restaurant,
+          dishes: [...restaurant.dishes, newDish]
+        };
+      }
+      return restaurant;
+    });
+
+    setRestaurants(updatedRestaurants);
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+  };
+
+  const updateDish = (dish: Dish) => {
+    const updatedRestaurants = restaurants.map(restaurant => {
+      if (restaurant.id === dish.restaurantId) {
+        return {
+          ...restaurant,
+          dishes: restaurant.dishes.map(d => d.id === dish.id ? dish : d)
+        };
+      }
+      return restaurant;
+    });
+
+    setRestaurants(updatedRestaurants);
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+  };
+
+  const deleteDish = (dishId: string, restaurantId: string) => {
+    const updatedRestaurants = restaurants.map(restaurant => {
+      if (restaurant.id === restaurantId) {
+        return {
+          ...restaurant,
+          dishes: restaurant.dishes.filter(dish => dish.id !== dishId)
+        };
+      }
+      return restaurant;
+    });
+
+    setRestaurants(updatedRestaurants);
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+  };
+
+  const addSection = (restaurantId: string, section: Omit<Section, 'id'>): string => {
+    const id = Date.now().toString();
+    const newSection: Section = {
+      id,
+      ...section
+    };
+
+    const updatedRestaurants = restaurants.map(restaurant => {
+      if (restaurant.id === restaurantId) {
+        return {
+          ...restaurant,
+          sections: [...restaurant.sections, newSection]
+        };
+      }
+      return restaurant;
+    });
+
+    setRestaurants(updatedRestaurants);
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+    return id;
+  };
+
+  const updateSection = (section: Section) => {
+    const updatedRestaurants = restaurants.map(restaurant => {
+      if (restaurant.id === section.restaurantId) {
+        return {
+          ...restaurant,
+          sections: restaurant.sections.map(s => s.id === section.id ? section : s)
+        };
+      }
+      return restaurant;
+    });
+
+    setRestaurants(updatedRestaurants);
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+  };
+
+  const deleteSection = (sectionId: string, restaurantId: string) => {
+    const updatedRestaurants = restaurants.map(restaurant => {
+      if (restaurant.id === restaurantId) {
+        return {
+          ...restaurant,
+          sections: restaurant.sections.filter(section => section.id !== sectionId),
+          dishes: restaurant.dishes.map(dish => ({ ...dish, sectionId: dish.sectionId === sectionId ? 'default' : dish.sectionId }))
+        };
+      }
+      return restaurant;
+    });
+
+    setRestaurants(updatedRestaurants);
+    localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
+  };
+
+  const value: RestaurantContextType = {
     restaurants,
+    currentUser,
     addRestaurant,
+    removeRestaurant,
     getRestaurant,
     addDish,
     updateDish,
     deleteDish,
-    removeRestaurant,
-    authenticateOwner,
-    restaurantOwners,
-    currentOwner,
-    setCurrentOwner,
-    logout,
     addSection,
     updateSection,
-    deleteSection
+    deleteSection,
+    authenticateOwner,
+    logout
   };
 
   return (
@@ -251,4 +232,12 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       {children}
     </RestaurantContext.Provider>
   );
+};
+
+export const useRestaurants = () => {
+  const context = useContext(RestaurantContext);
+  if (context === undefined) {
+    throw new Error('useRestaurants must be used within a RestaurantProvider');
+  }
+  return context;
 };

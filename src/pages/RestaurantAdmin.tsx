@@ -185,41 +185,56 @@ const RestaurantAdmin = () => {
     dish => dish.sectionId === selectedSectionId
   ) || [];
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setDishImageUrl(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   if (!restaurant) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="container mx-auto px-4 py-4 sm:py-8">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{restaurant.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{restaurant.name}</h1>
           <p className="text-gray-500">Manage restaurant menu</p>
         </div>
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={() => navigate('/admin')}>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => navigate('/admin')} className="text-xs sm:text-sm">
             Back to Dashboard
           </Button>
           <Button 
             variant="outline"
             onClick={() => {
-              navigator.clipboard.writeText(`${window.location.origin}/restaurant/${restaurant.id}`);
+              navigator.clipboard.writeText(restaurantUrl);
               toast.success('Restaurant URL copied to clipboard');
             }}
+            className="text-xs sm:text-sm"
           >
-            <LinkIcon className="mr-2 h-4 w-4" />
-            Copy Restaurant URL
+            <LinkIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            Copy URL
           </Button>
           <Button 
             variant="outline"
             onClick={() => setIsQrDialogOpen(true)}
+            className="text-xs sm:text-sm"
           >
-            <QrCode className="mr-2 h-4 w-4" />
+            <QrCode className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
             QR Code
           </Button>
           <Button 
             variant="outline"
             onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+            className="text-xs sm:text-sm"
           >
             View Public Page
           </Button>
@@ -283,20 +298,20 @@ const RestaurantAdmin = () => {
         selectedSectionId={selectedSectionId}
       />
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold">
           {selectedSectionId 
             ? `Menu Items in ${restaurant.sections.find(s => s.id === selectedSectionId)?.name || 'Selected Section'} (${sectionDishes.length})`
             : `Menu Items (${restaurant.dishes?.length || 0})`}
         </h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleOpenAddDishDialog}>
+            <Button onClick={handleOpenAddDishDialog} className="w-full sm:w-auto">
               <Plus className="mr-2 h-4 w-4" />
               Add New Dish
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px]">
+          <DialogContent className="w-[95vw] max-w-[550px] max-h-[90vh] overflow-y-auto m-2">
             <DialogHeader>
               <DialogTitle>{editingDish ? 'Edit Dish' : 'Add New Dish'}</DialogTitle>
               <DialogDescription>
@@ -304,75 +319,71 @@ const RestaurantAdmin = () => {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="dish-name" className="text-right col-span-1">
-                  Name
+              <div className="space-y-2">
+                <label htmlFor="dish-name" className="text-sm font-medium">
+                  Dish Name *
                 </label>
                 <Input
                   id="dish-name"
-                  className="col-span-3"
                   value={dishName}
                   onChange={(e) => setDishName(e.target.value)}
                   placeholder="Dish name"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="dish-description" className="text-right col-span-1">
+              
+              <div className="space-y-2">
+                <label htmlFor="dish-description" className="text-sm font-medium">
                   Description
                 </label>
                 <Textarea
                   id="dish-description"
-                  className="col-span-3"
                   value={dishDescription}
                   onChange={(e) => setDishDescription(e.target.value)}
                   placeholder="Dish description"
+                  rows={3}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="dish-price" className="text-right col-span-1">
-                  Price
+              
+              <div className="space-y-2">
+                <label htmlFor="dish-price" className="text-sm font-medium">
+                  Price *
                 </label>
                 <Input
                   id="dish-price"
-                  className="col-span-3"
                   value={dishPrice}
                   onChange={(e) => setDishPrice(e.target.value)}
                   placeholder="$0.00"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="dish-image" className="text-right col-span-1">
-                  Image URL
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Dish Image (Recommended: 800x600px, landscape format)
                 </label>
-                <Input
-                  id="dish-image"
-                  className="col-span-3"
-                  value={dishImageUrl}
-                  onChange={(e) => setDishImageUrl(e.target.value)}
-                  placeholder="Image URL (optional)"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <div className="col-span-1"></div>
-                <div className="col-span-3">
+                <div className="flex flex-col gap-2">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="cursor-pointer"
+                  />
                   {dishImageUrl && (
                     <div className="h-32 w-full overflow-hidden rounded border">
                       <img
                         src={dishImageUrl}
                         alt="Dish preview"
                         className="h-full w-full object-cover"
-                        onError={(e) => (e.currentTarget.src = 'https://source.unsplash.com/random/?food')}
                       />
                     </div>
                   )}
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button onClick={handleSaveDish}>
+              <Button onClick={handleSaveDish} className="w-full sm:w-auto">
                 {editingDish ? 'Save Changes' : 'Add Dish'}
               </Button>
             </DialogFooter>
@@ -380,56 +391,99 @@ const RestaurantAdmin = () => {
         </Dialog>
       </div>
 
+      {/* Mobile-optimized table */}
       {sectionDishes && sectionDishes.length > 0 ? (
         <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sectionDishes.map((dish) => (
-                <TableRow key={dish.id}>
-                  <TableCell>
-                    <div className="h-16 w-16 rounded overflow-hidden bg-gray-100">
-                      <img
-                        src={dish.imageUrl}
-                        alt={dish.name}
-                        className="h-full w-full object-cover"
-                        onError={(e) => (e.currentTarget.src = 'https://source.unsplash.com/random/?food')}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">{dish.name}</TableCell>
-                  <TableCell className="max-w-[300px]">
-                    <div className="line-clamp-2">{dish.description}</div>
-                  </TableCell>
-                  <TableCell>{dish.price}</TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenEditDishDialog(dish)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteDish(dish)}
-                    >
-                      <Trash className="h-4 w-4 text-red-500" />
-                    </Button>
-                  </TableCell>
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Image</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {sectionDishes.map((dish) => (
+                  <TableRow key={dish.id}>
+                    <TableCell>
+                      <div className="h-16 w-16 rounded overflow-hidden bg-gray-100">
+                        <img
+                          src={dish.imageUrl}
+                          alt={dish.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">{dish.name}</TableCell>
+                    <TableCell className="max-w-[300px]">
+                      <div className="line-clamp-2">{dish.description}</div>
+                    </TableCell>
+                    <TableCell>{dish.price}</TableCell>
+                    <TableCell className="text-right space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenEditDishDialog(dish)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteDish(dish)}
+                      >
+                        <Trash className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          
+          {/* Mobile card layout */}
+          <div className="block sm:hidden space-y-4 p-4">
+            {sectionDishes.map((dish) => (
+              <div key={dish.id} className="border rounded-lg p-4 space-y-3">
+                <div className="flex gap-3">
+                  <div className="h-16 w-16 rounded overflow-hidden bg-gray-100 flex-shrink-0">
+                    <img
+                      src={dish.imageUrl}
+                      alt={dish.name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium truncate">{dish.name}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-2">{dish.description}</p>
+                    <p className="font-semibold">{dish.price}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpenEditDishDialog(dish)}
+                    className="flex-1"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteDish(dish)}
+                    className="flex-1"
+                  >
+                    <Trash className="h-4 w-4 text-red-500 mr-1" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="text-center py-12 border rounded-lg">
