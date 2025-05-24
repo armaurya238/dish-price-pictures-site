@@ -19,16 +19,17 @@ interface MenuSectionProps {
 
 const MenuSection: React.FC<MenuSectionProps> = ({ id, title, description, dishes }) => {
   return (
-    <section id={id} className="py-16 menu-container">
+    <section id={id} className="py-8 sm:py-16 menu-container">
       <div className="container mx-auto px-4">
-        <div className="mb-10 text-center">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">{title}</h2>
+        <div className="mb-6 sm:mb-10 text-center">
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-4">{title}</h2>
           {description && (
-            <p className="text-gray-600 max-w-2xl mx-auto">{description}</p>
+            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">{description}</p>
           )}
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Mobile: 2 columns, Tablet: 2 columns, Desktop: 3 columns */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 md:gap-8">
           {dishes.map((dish) => (
             <DishCard
               key={dish.id}

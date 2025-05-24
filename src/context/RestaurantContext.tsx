@@ -33,12 +33,16 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => {
     const storedRestaurants = localStorage.getItem('restaurants');
     if (storedRestaurants) {
-      setRestaurants(JSON.parse(storedRestaurants));
+      const parsedRestaurants = JSON.parse(storedRestaurants);
+      console.log('Loaded restaurants from localStorage:', parsedRestaurants);
+      setRestaurants(parsedRestaurants);
     }
 
     const storedCredentials = localStorage.getItem('ownerCredentials');
     if (storedCredentials) {
-      setOwnerCredentials(JSON.parse(storedCredentials));
+      const parsedCredentials = JSON.parse(storedCredentials);
+      console.log('Loaded credentials from localStorage:', parsedCredentials);
+      setOwnerCredentials(parsedCredentials);
     }
   }, []);
 
@@ -69,14 +73,16 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const authenticateOwner = (username: string, password: string): string | null => {
-    console.log('Authenticating:', username, password);
+    console.log('Authenticating owner:', username, password);
     console.log('Available credentials:', ownerCredentials);
+    console.log('Available restaurants:', restaurants);
     
     const credentials = ownerCredentials.find(
       cred => cred.username === username && cred.password === password
     );
     
     if (credentials) {
+      console.log('Authentication successful for:', credentials);
       setCurrentOwner({
         restaurantId: credentials.restaurantId,
         username: credentials.username
@@ -84,6 +90,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       return credentials.restaurantId;
     }
     
+    console.log('Authentication failed - no matching credentials found');
     return null;
   };
 
@@ -102,7 +109,11 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const getRestaurant = (id: string): Restaurant | undefined => {
-    return restaurants.find(restaurant => restaurant.id === id);
+    console.log('Getting restaurant with ID:', id);
+    console.log('Available restaurants:', restaurants);
+    const restaurant = restaurants.find(restaurant => restaurant.id === id);
+    console.log('Found restaurant:', restaurant);
+    return restaurant;
   };
 
   const addDish = (restaurantId: string, sectionId: string, dish: Omit<Dish, 'id' | 'restaurantId' | 'sectionId'>) => {

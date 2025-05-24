@@ -14,11 +14,27 @@ const RestaurantPage = () => {
   const restaurant = getRestaurant(id || '');
 
   useEffect(() => {
-    if (!restaurant) {
+    console.log('Restaurant ID from URL:', id);
+    console.log('Restaurant found:', restaurant);
+    
+    if (id && !restaurant) {
+      console.log('Restaurant not found for ID:', id);
       toast.error('Restaurant not found');
-      navigate('/');
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
     }
-  }, [restaurant, navigate]);
+  }, [restaurant, navigate, id]);
+
+  if (!id) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold mb-4">Invalid Restaurant URL</h1>
+        <p className="mb-8">No restaurant ID provided in the URL.</p>
+        <Button onClick={() => navigate('/')}>Return to Home</Button>
+      </div>
+    );
+  }
 
   if (!restaurant) {
     return (

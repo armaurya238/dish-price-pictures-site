@@ -34,7 +34,7 @@ const Login = () => {
     const restaurantId = authenticateOwner(username, password);
     if (restaurantId) {
       toast.success('Login successful!');
-      navigate(`/owner/dashboard`);
+      navigate('/owner/dashboard');
     } else {
       toast.error('Invalid username or password');
     }
