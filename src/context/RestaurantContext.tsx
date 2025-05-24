@@ -3,14 +3,14 @@ import { Restaurant, Dish, Section } from '@/types/restaurant';
 
 interface RestaurantContextType {
   restaurants: Restaurant[];
-  currentUser: { restaurantId: string; username: string } | null;
+  currentOwner: { restaurantId: string; username: string } | null;
   addRestaurant: (restaurant: Omit<Restaurant, 'id'>, username: string, password: string) => string;
   removeRestaurant: (id: string) => void;
   getRestaurant: (id: string) => Restaurant | undefined;
   addDish: (restaurantId: string, sectionId: string, dish: Omit<Dish, 'id' | 'restaurantId' | 'sectionId'>) => void;
   updateDish: (dish: Dish) => void;
   deleteDish: (dishId: string, restaurantId: string) => void;
-  addSection: (restaurantId: string, section: Omit<Section, 'id'>) => string;
+  addSection: (restaurantId: string, section: Omit<Section, 'id' | 'restaurantId'>) => string;
   updateSection: (section: Section) => void;
   deleteSection: (sectionId: string, restaurantId: string) => void;
   authenticateOwner: (username: string, password: string) => string | null;
@@ -28,7 +28,7 @@ interface OwnerCredentials {
 export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [ownerCredentials, setOwnerCredentials] = useState<OwnerCredentials[]>([]);
-  const [currentUser, setCurrentUser] = useState<{ restaurantId: string; username: string } | null>(null);
+  const [currentOwner, setCurrentOwner] = useState<{ restaurantId: string; username: string } | null>(null);
 
   useEffect(() => {
     const storedRestaurants = localStorage.getItem('restaurants');
@@ -77,7 +77,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     );
     
     if (credentials) {
-      setCurrentUser({
+      setCurrentOwner({
         restaurantId: credentials.restaurantId,
         username: credentials.username
       });
@@ -88,7 +88,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const logout = () => {
-    setCurrentUser(null);
+    setCurrentOwner(null);
   };
 
   const removeRestaurant = (id: string) => {
@@ -158,10 +158,11 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     localStorage.setItem('restaurants', JSON.stringify(updatedRestaurants));
   };
 
-  const addSection = (restaurantId: string, section: Omit<Section, 'id'>): string => {
+  const addSection = (restaurantId: string, section: Omit<Section, 'id' | 'restaurantId'>): string => {
     const id = Date.now().toString();
     const newSection: Section = {
       id,
+      restaurantId,
       ...section
     };
 
@@ -213,7 +214,7 @@ export const RestaurantProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const value: RestaurantContextType = {
     restaurants,
-    currentUser,
+    currentOwner,
     addRestaurant,
     removeRestaurant,
     getRestaurant,
