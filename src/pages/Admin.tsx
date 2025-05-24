@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useRestaurants } from '../context/RestaurantContext';
 import { useNavigate } from 'react-router-dom';
@@ -106,93 +107,98 @@ const Admin = () => {
               Add New Restaurant
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add New Restaurant</DialogTitle>
               <DialogDescription>
                 Enter details about the new restaurant you want to onboard.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="name" className="text-right col-span-1">
-                  Name
-                </label>
-                <Input
-                  id="name"
-                  className="col-span-3"
-                  value={restaurantName}
-                  onChange={(e) => setRestaurantName(e.target.value)}
-                  placeholder="Restaurant name"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="description" className="text-right col-span-1">
-                  Description
-                </label>
-                <Textarea
-                  id="description"
-                  className="col-span-3"
-                  value={restaurantDescription}
-                  onChange={(e) => setRestaurantDescription(e.target.value)}
-                  placeholder="Restaurant description"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="logo" className="text-right col-span-1">
-                  Logo URL
-                </label>
-                <Input
-                  id="logo"
-                  className="col-span-3"
-                  value={restaurantLogo}
-                  onChange={(e) => setRestaurantLogo(e.target.value)}
-                  placeholder="Logo image URL (optional)"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="cover" className="text-right col-span-1">
-                  Cover Image
-                </label>
-                <Input
-                  id="cover"
-                  className="col-span-3"
-                  value={restaurantCover}
-                  onChange={(e) => setRestaurantCover(e.target.value)}
-                  placeholder="Cover image URL (optional)"
-                />
+            <div className="grid gap-6 py-4">
+              <div className="space-y-4">
+                <h3 className="font-medium text-lg">Restaurant Information</h3>
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-sm font-medium">
+                    Restaurant Name *
+                  </label>
+                  <Input
+                    id="name"
+                    value={restaurantName}
+                    onChange={(e) => setRestaurantName(e.target.value)}
+                    placeholder="Enter restaurant name"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="description" className="text-sm font-medium">
+                    Description
+                  </label>
+                  <Textarea
+                    id="description"
+                    value={restaurantDescription}
+                    onChange={(e) => setRestaurantDescription(e.target.value)}
+                    placeholder="Brief description of the restaurant"
+                    rows={3}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="logo" className="text-sm font-medium">
+                    Logo URL (Optional)
+                  </label>
+                  <Input
+                    id="logo"
+                    value={restaurantLogo}
+                    onChange={(e) => setRestaurantLogo(e.target.value)}
+                    placeholder="https://example.com/logo.jpg"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="cover" className="text-sm font-medium">
+                    Cover Image URL (Optional)
+                  </label>
+                  <Input
+                    id="cover"
+                    value={restaurantCover}
+                    onChange={(e) => setRestaurantCover(e.target.value)}
+                    placeholder="https://example.com/cover.jpg"
+                  />
+                </div>
               </div>
               
-              <div className="border-t my-2"></div>
-              <h3 className="font-medium">Owner Account Details</h3>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="username" className="text-right col-span-1">
-                  Username
-                </label>
-                <Input
-                  id="username"
-                  className="col-span-3"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Owner's username"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label htmlFor="password" className="text-right col-span-1">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  className="col-span-3"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Owner's password"
-                />
+              <div className="border-t pt-4 space-y-4">
+                <h3 className="font-medium text-lg">Owner Account Details</h3>
+                <div className="space-y-2">
+                  <label htmlFor="username" className="text-sm font-medium">
+                    Username *
+                  </label>
+                  <Input
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Owner's login username"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="password" className="text-sm font-medium">
+                    Password *
+                  </label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Owner's login password"
+                  />
+                </div>
               </div>
             </div>
             <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
               <Button onClick={handleAddRestaurant}>Add Restaurant</Button>
             </DialogFooter>
           </DialogContent>

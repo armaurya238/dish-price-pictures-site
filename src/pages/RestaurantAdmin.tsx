@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRestaurants } from '../context/RestaurantContext';
@@ -178,6 +177,7 @@ const RestaurantAdmin = () => {
     }
   };
 
+  // Generate the correct restaurant-specific URL
   const restaurantUrl = `${window.location.origin}/restaurant/${id}`;
 
   // Get dishes for the selected section
@@ -244,7 +244,7 @@ const RestaurantAdmin = () => {
                 includeMargin={true}
               />
             </div>
-            <p className="text-xs text-muted-foreground mt-2">{restaurantUrl}</p>
+            <p className="text-xs text-muted-foreground mt-2 text-center break-all">{restaurantUrl}</p>
           </div>
           <DialogFooter>
             <Button onClick={() => setIsQrDialogOpen(false)} variant="outline">

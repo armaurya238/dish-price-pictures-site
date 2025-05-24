@@ -41,21 +41,21 @@ const Index = () => {
       name: "Truffle Arancini",
       description: "Crispy risotto balls infused with black truffle and stuffed with mozzarella cheese, served with garlic aioli",
       price: "$14",
-      imageUrl: "https://images.unsplash.com/photo-1574484284002-952d92456975?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=500&h=300&fit=crop"
     },
     {
       id: "s2",
       name: "Beet Carpaccio",
       description: "Thinly sliced roasted beets with goat cheese, candied walnuts, and micro greens drizzled with balsamic glaze",
       price: "$12",
-      imageUrl: "https://images.unsplash.com/photo-1633436375153-11716ebe9667?q=80&w=1972&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&h=300&fit=crop"
     },
     {
       id: "s3",
       name: "Tuna Tartare",
       description: "Fresh diced tuna mixed with avocado, cucumber, and sesame-soy dressing, served with wonton crisps",
       price: "$16",
-      imageUrl: "https://images.unsplash.com/photo-1626200419199-391ae4be7a44?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&h=300&fit=crop"
     }
   ];
 
@@ -65,21 +65,21 @@ const Index = () => {
       name: "Filet Mignon",
       description: "8oz grass-fed beef tenderloin with truffle mashed potatoes, roasted asparagus, and red wine reduction",
       price: "$38",
-      imageUrl: "https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=2070&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=500&h=300&fit=crop"
     },
     {
       id: "m2",
       name: "Herb Roasted Chicken",
       description: "Free-range half chicken marinated in herbs, served with wild mushroom risotto and seasonal vegetables",
       price: "$28",
-      imageUrl: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?q=80&w=2076&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=500&h=300&fit=crop"
     },
     {
       id: "m3",
       name: "Braised Short Rib",
       description: "Slow-cooked beef short rib with celeriac purée, glazed root vegetables, and natural jus",
       price: "$32",
-      imageUrl: "https://images.unsplash.com/photo-1544025162-f72b1d478c95?q=80&w=2069&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1544025162-f72b1d478c95?w=500&h=300&fit=crop"
     }
   ];
 
@@ -89,21 +89,21 @@ const Index = () => {
       name: "Pan-Seared Scallops",
       description: "Jumbo scallops with sweet corn purée, crispy pancetta, and micro herbs",
       price: "$34",
-      imageUrl: "https://images.unsplash.com/photo-1632807519158-e02ce273736e?q=80&w=2066&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=500&h=300&fit=crop"
     },
     {
       id: "sf2",
       name: "Grilled Octopus",
       description: "Tender Spanish octopus with fingerling potatoes, chorizo, olives, and smoked paprika oil",
       price: "$28",
-      imageUrl: "https://images.unsplash.com/photo-1599084993091-1cb5c0129564?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1615141982883-c7ad0e69fd62?w=500&h=300&fit=crop"
     },
     {
       id: "sf3",
       name: "Miso Glazed Salmon",
       description: "Scottish salmon with miso glaze, forbidden rice, bok choy, and ginger-scallion sauce",
       price: "$30",
-      imageUrl: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=2070&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=500&h=300&fit=crop"
     }
   ];
 
@@ -113,21 +113,21 @@ const Index = () => {
       name: "Wild Mushroom Risotto",
       description: "Creamy Arborio rice with assorted wild mushrooms, truffle oil, and Parmigiano-Reggiano",
       price: "$24",
-      imageUrl: "https://images.unsplash.com/photo-1633895545365-bcdb53b4dd06?q=80&w=1972&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=500&h=300&fit=crop"
     },
     {
       id: "v2",
       name: "Mediterranean Vegetable Tart",
       description: "Roasted eggplant, zucchini, and bell peppers in a savory tart shell with herbed goat cheese",
       price: "$22",
-      imageUrl: "https://images.unsplash.com/photo-1464500422302-6188776dcbf4?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=500&h=300&fit=crop"
     },
     {
       id: "v3",
       name: "Spiced Cauliflower Steak",
       description: "Thick-cut cauliflower steak with harissa spice, tahini sauce, pomegranate seeds, and pine nuts",
       price: "$20",
-      imageUrl: "https://images.unsplash.com/photo-1553557202-676ab853382a?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&h=300&fit=crop"
     }
   ];
 
@@ -137,21 +137,21 @@ const Index = () => {
       name: "Dark Chocolate Soufflé",
       description: "Warm chocolate soufflé with vanilla bean ice cream and raspberry coulis",
       price: "$14",
-      imageUrl: "https://images.unsplash.com/photo-1579306194872-64d3b7bac4c2?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=500&h=300&fit=crop"
     },
     {
       id: "d2",
       name: "Lemon Tart",
       description: "Tangy lemon curd in a buttery shortbread shell with Italian meringue and fresh berries",
       price: "$12",
-      imageUrl: "https://images.unsplash.com/photo-1464195244916-405fa0a82545?q=80&w=2002&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=500&h=300&fit=crop"
     },
     {
       id: "d3",
       name: "Tiramisu",
       description: "Classic Italian dessert with layers of espresso-soaked ladyfingers and mascarpone cream",
       price: "$10",
-      imageUrl: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&h=300&fit=crop"
     }
   ];
 
@@ -161,21 +161,21 @@ const Index = () => {
       name: "Signature Cocktails",
       description: "Selection of house special cocktails crafted by our mixologists",
       price: "$14-18",
-      imageUrl: "https://images.unsplash.com/photo-1578664182340-5eeb67a8e8bf?q=80&w=1974&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1551024601-bec78aea704b?w=500&h=300&fit=crop"
     },
     {
       id: "dr2",
       name: "Wine Selection",
       description: "Carefully curated wines from around the world",
       price: "$12-20/glass",
-      imageUrl: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=2070&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=500&h=300&fit=crop"
     },
     {
       id: "dr3",
       name: "Artisanal Coffee",
       description: "Premium coffee and espresso drinks",
       price: "$5-8",
-      imageUrl: "https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=1964&auto=format"
+      imageUrl: "https://images.unsplash.com/photo-1545665277-5937489579f2?w=500&h=300&fit=crop"
     }
   ];
 
